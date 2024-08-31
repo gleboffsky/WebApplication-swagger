@@ -1,15 +1,32 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using AuthService.Data;
 
 namespace AuthService.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class TestController : ControllerBase
     {
-        [HttpGet]
-        public IActionResult Get()
+        private readonly ApplicationContext _context;
+
+        public TestController(ApplicationContext context)
         {
-            return Ok("Jija");
+            _context = context;
+        }
+
+        [HttpGet("test-db")]
+        public async Task<IActionResult> TestDbConnection()
+        {
+            try
+            {
+                var count = await _context.Users.CountAsync();
+                return Ok(new { Message = "Database connection is successful", EntityCount = count });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Database connection failed", Error = ex.Message });
+            }
         }
     }
 }
